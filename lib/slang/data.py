@@ -1,5 +1,5 @@
 from clang import cindex
-import fnmatch
+from fnmatch import fnmatch
 import os
 import sys
 import warnings
@@ -11,7 +11,7 @@ def parseDirectory(dirname, glob='*.[ch]pp'):
   for dirpath,_,filenames in os.walk(dirname):
     for filename in filenames:
       abspath = os.path.join(dirpath, filename)
-      if not fnmatch.fnmatch(abspath, glob):
+      if not fnmatch(abspath, glob):
         continue
       index = cindex.Index.create()
       astpath = abspath + '.ast'

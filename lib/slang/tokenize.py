@@ -1,10 +1,13 @@
 #!/usr/bin/env python2
-import sys
 from clang import cindex
-import code
-import pdb
+from fnmatch import fnmatch
+from itertools import ifilter
+import sys
 
-__all__ = ['tokenize']
+__all__ = [
+    'cursorize', 'dumpSource', 'dumpTokens', 'filterCursorsByFilename'
+  , 'tokenize'
+  ]
 
 # Order and hash tokens and cursors by their location in the source file.
 cindex.SourceLocation.__lt__ = lambda lhs,rhs: lhs.offset < rhs.offset
@@ -71,8 +74,6 @@ class WhitespaceToken(object):
     assert prior_token._tu.cursor == next_token._tu.cursor
     offset = source.tell()
     self.spelling = source.read(1)
-    if not self.spelling.isspace() and self.spelling != '\\':
-      raise Exception('whitespace expected')
     self.kind = cindex.TokenKind.WHITESPACE
     self.cursor = mrca(prior_token.cursor, next_token.cursor)
     begin,end = (
@@ -85,12 +86,39 @@ class WhitespaceToken(object):
       )
     self.location = begin
     self.extent = cindex.SourceRange.from_locations(begin, end)
-
+    if not self.isWhitespace(self.spelling):
+      raise Exception('whitespace expected at %s, got "%s"'
+          % (self.location, self.spelling)
+        )
+  @staticmethod
+  def isWhitespace(ch):
+    return ch.isspace() or ch == '\\' or ch == ''
+  @staticmethod
+  def peek(source):
+    offset = source.tell()
+    ch = source.read(1)
+    source.seek(offset)
+    return ch
   @property
   def isLineEnding(self):
     return self.spelling == '\n' or self.spelling == '\\'
-
+  @property
+  def isNil(self):
+    return self.spelling == ''
   __repr__ = _generic_repr
+
+def cursorize(cursor):
+  yield cursor
+  for child in cursor.get_children():
+    for c in cursorize(child):
+      yield c
+
+def filterCursorsByFilename(cursors, predicate):
+  def ifilter_predicate(cursor):
+    file = cursor.location.file
+    ans = file is None or predicate(file.name)
+    return ans
+  return ifilter(ifilter_predicate, cursors)
 
 def tokenize(cursor, strip_trailing_whitespace=True):
   '''
@@ -99,12 +127,13 @@ def tokenize(cursor, strip_trailing_whitespace=True):
   '''
   source = open(cursor._tu.spelling, 'r')
   prev_tok = None
-  for next_tok in sorted(cursor.get_tokens()):
+  for next_tok in sorted(cursor.get_tokens())[:-1]: # FIXME!!
     if prev_tok:
       source.seek(prev_tok.extent.end.offset)
       buffer = []
       while source.tell() < next_tok.location.offset:
         ws = WhitespaceToken(prev_tok, next_tok, source)
+        if ws.isNil: continue
         if ws.isLineEnding and strip_trailing_whitespace:
           if ws.spelling == '\\':
             for item in buffer: yield item
@@ -121,6 +150,7 @@ def tokenize(cursor, strip_trailing_whitespace=True):
     while(True):
       try:
         ws = WhitespaceToken(prev_tok, next_tok, source)
+        if ws.isNil: break
         if ws.isLineEnding and strip_trailing_whitespace:
           if ws.spelling == '\\':
             for item in buffer: yield item
@@ -178,9 +208,9 @@ def dumpTokens(cursor):
     print '%s    %-15s %s' % ('  ' * len(context), tok.kind.name.lower(), repr_)
   _updateContext(context, prev_cursor, None)
 
-def generateSource(cursor):
+def dumpSource(cursor, stream=sys.stdout):
   for tok in tokenize(cursor):
-    sys.stdout.write(tok.spelling)
+    stream.write(tok.spelling)
 
 if __name__ == '__main__':
   """Usage: call with <filename>"""
@@ -190,8 +220,6 @@ if __name__ == '__main__':
     tu = index.read(filename)
   else:
     tu = index.parse(filename)
-
-  # generateSource(tu.cursor)
   dumpTokens(tu.cursor)
-  # tokens = list(tokenize(tu.cursor))
+  # dumpSource(tu.cursor)
 
