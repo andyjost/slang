@@ -3,7 +3,8 @@
 lib/clang*
 
 # Data sets.
-data/*
+data/boost*
+data/blitz*
 
 # Compiled Object files
 *.slo

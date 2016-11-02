@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from clang import cindex
 from clang.cindex import TokenKind, CursorKind
@@ -26,8 +26,7 @@ def get_cursors(tu):
   cursors = ifilter(lambda cursor: cursor.kind in FUNCTION_KINDS, cursors)
   return cursors
 
-# for tu in islice(parseDirectory('boost/python'), 10000):
-for tu in parseDirectory(sys.argv[1]):
+for tu in parseDirectory(sys.argv[1], xargs=['-I.']):
   # print tu
   for cursor in get_cursors(tu):
     # Only consider functions with bodies.

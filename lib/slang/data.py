@@ -7,7 +7,12 @@ import warnings
 # These can be quite large.
 CACHE_AST_FILES = False
 
-def parseDirectory(dirname, glob='*.[ch]pp'):
+# Ignore include directives, since they are not necessary and slow down
+# extraction tremendously.
+DEFAULT_ARGS = ['-nostdinc', '-nostdinc++']
+
+def parseDirectory(dirname, glob='*.[ch]pp', args=DEFAULT_ARGS, xargs=[]):
+  args = args + xargs
   for dirpath,_,filenames in os.walk(dirname):
     for filename in filenames:
       abspath = os.path.join(dirpath, filename)
@@ -19,7 +24,7 @@ def parseDirectory(dirname, glob='*.[ch]pp'):
         yield index.read(astpath)
       else:
         try:
-          tu = index.parse(abspath)
+          tu = index.parse(abspath, args=args)
         except:
           warnings.warn('Failed to parse %s' % abspath)
           continue

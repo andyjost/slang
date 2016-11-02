@@ -2,7 +2,7 @@
 
 from clang import cindex
 from fnmatch import fnmatch
-from itertools import ifilter, dropwhile, takewhile
+from itertools import chain, ifilter, dropwhile, takewhile, izip
 import sys
 
 __all__ = [
@@ -64,11 +64,18 @@ cindex.Token.__repr__ = _generic_repr
 def mrca(a, b):
   '''Most-recent common (semantic) ancestor for cursors.'''
   if a is None or b is None: return None
-  ancestors = {ancestor for ancestor in semanticAncestors(a)}
-  for x in semanticAncestors(b):
-    if x in ancestors:
-      return x
-  # Means bugginess in cindex.
+  # ancestors = {ancestor for ancestor in semanticAncestors(a)}
+  # for x in semanticAncestors(b):
+  #   if x in ancestors:
+  #     return x
+  # assert a._tu.cursor == b._tu.cursor
+  # return a._tu.cursor
+  s = set()
+  for i,j in izip(semanticAncestors(a), semanticAncestors(b)):
+    if i in s: return i
+    s.add(i)
+    if j in s: return j
+    s.add(j)
   assert a._tu.cursor == b._tu.cursor
   return a._tu.cursor
 
@@ -77,17 +84,24 @@ cindex.TokenKind.register(100, 'WHITESPACE')
 class Eof(Exception): pass
 
 class WhitespaceToken(object):
-  def __init__(self, prior_token, next_token, source):
-    assert prior_token._tu.cursor == next_token._tu.cursor
+  def __init__(self, prev_tok, next_tok, source):
+    assert _filenameFromCursor(prev_tok.cursor) == source.name
+    if next_tok is not None:
+      assert prev_tok._tu.cursor == next_tok._tu.cursor
+      assert _filenameFromCursor(next_tok.cursor) == source.name
     offset = source.tell()
     self.spelling = source.read(1)
     if self.spelling == '': raise Eof()
     self.kind = cindex.TokenKind.WHITESPACE
-    self.cursor = mrca(prior_token.cursor, next_token.cursor)
+    if next_tok is None:
+      self.cursor = list(semanticAncestors(prev_tok.cursor))[-1]
+    else:
+      self.cursor = mrca(prev_tok.cursor, next_tok.cursor)
+
     begin,end = (
         cindex.SourceLocation.from_offset(
-            prior_token._tu
-          , prior_token.location.file
+            prev_tok._tu
+          , prev_tok.location.file
           , offset + i
           )
         for i in range(2)
@@ -122,15 +136,15 @@ def filterCursorsByFilename(cursors, predicate):
     return ans
   return ifilter(ifilter_predicate, cursors)
 
-def _getTokens(cursor):
+def _getTokens(cursor, source, **kwds):
   '''
   Monkey-patches cindex.get_tokens to work around inconsistencies.
 
   The last token for functions requires special handling.  Consider:
-  
+
       (1) bool foo();
       (2) bool foo() {} // anything
-  
+
   In the declaration (case 1), the semicolon, which belongs to the cursor of
   the surrounding context, is included in the cursor's tokens.  In the
   definition (case 2), the token following the function definition, which
@@ -145,8 +159,8 @@ def _getTokens(cursor):
 def _getWsBetween(prev_tok, next_tok, source, **kwds):
   buffer = []
   source.seek(prev_tok.extent.end.offset)
-  # while source.tell() < next_tok.location.offset:
-  while source.tell() < next_tok.extent.start.offset:
+  end = 2**63 if next_tok is None else next_tok.extent.start.offset
+  while source.tell() < end:
     try:
       ws = WhitespaceToken(prev_tok, next_tok, source)
     except Eof:
@@ -162,52 +176,43 @@ def _getWsBetween(prev_tok, next_tok, source, **kwds):
   for ws in buffer:
     yield ws
 
+def _filenameFromCursor(cursor):
+  if cursor.location.file:
+    return cursor.location.file.name
+  else:
+    return cursor._tu.spelling
+
 def tokenize(cursor, **kwds):
   '''
   Produces the complete sequence of tokens associated with the given cursor.
   Inserts whitespace tokens.
   '''
-  source = open(cursor._tu.spelling, 'r')
+  # source = open(cursor._tu.spelling, 'r')
+  filename = _filenameFromCursor(cursor)
+  source = open(filename, 'r')
   prev_tok = None
-  for next_tok in _getTokens(cursor):
+  raw_tokens = _getTokens(cursor, source, **kwds)
+  if not raw_tokens: return
+  if kwds.pop('include_predent', None):
+    parent = cursor
+    while parent and parent.extent == cursor.extent:
+      parent = cursor.lexical_parent
+    if parent:
+      assert _filenameFromCursor(parent) == filename
+      more_tokens = sorted(parent.get_tokens())
+      try:
+        ibegin = more_tokens.index(raw_tokens[0])
+      except ValueError:
+        pass
+      else:
+        assert ibegin > 0
+        prev_tok = more_tokens[ibegin-1]
+  for next_tok in raw_tokens:
     if prev_tok:
       for ws in _getWsBetween(prev_tok, next_tok, source):
         yield ws
-      # source.seek(prev_tok.extent.end.offset)
-      # buffer = []
-      # while source.tell() < next_tok.location.offset:
-      #   ws = WhitespaceToken(prev_tok, next_tok, source)
-      #   assert not ws.isNil
-      #   if ws.isLineEnding and strip_trailing_whitespace:
-      #     if ws.spelling == '\\':
-      #       for item in buffer: yield item
-      #     buffer = []
-      #     yield ws
-      #   else:
-      #     buffer.append(ws)
-      # for ws in buffer: yield ws
     yield next_tok
     prev_tok = next_tok
-  if prev_tok:
-      for ws in _getWsBetween(prev_tok, next_tok, source):
-        yield ws
-    # source.seek(prev_tok.extent.end.offset)
-    # buffer = []
-    # while(True):
-    #   try:
-    #     ws = WhitespaceToken(prev_tok, next_tok, source)
-    #     assert not ws.isNil
-    #     if ws.isLineEnding and kwds.get('strip_trailing_whitespace'):
-    #       if ws.spelling == '\\':
-    #         for item in buffer: yield item
-    #       buffer = []
-    #       yield ws
-    #     else:
-    #       buffer.append(ws)
-    #   except:
-    #     break
-    # for ws in buffer:
-    #   yield ws
 
 def _updateContext(context, prev_cursor, next_cursor):
   '''Helper for dumpTokens.'''
@@ -277,10 +282,10 @@ def subsequent_siblings(cursor):
       lambda s: s != cursor
     , cursor.lexical_parent.get_children()
     )
-     
+
 def dumpSource(cursor, stream=sys.stdout, **kwds):
- for tok in tokenize(cursor, **kwds):
-   stream.write(tok.spelling)
+  for tok in tokenize(cursor, **kwds):
+    stream.write(tok.spelling)
 
 if __name__ == '__main__':
   """Usage: call with <filename>"""
@@ -290,6 +295,6 @@ if __name__ == '__main__':
     tu = index.read(filename)
   else:
     tu = index.parse(filename)
-  dumpTokens(tu.cursor)
-  # dumpSource(tu.cursor)
+  # dumpTokens(tu.cursor)
+  dumpSource(tu.cursor)
 
