@@ -18,17 +18,21 @@ def parseDirectory(dirname, glob='*.[ch]pp', args=DEFAULT_ARGS, xargs=[]):
       abspath = os.path.join(dirpath, filename)
       if not fnmatch(abspath, glob):
         continue
-      index = cindex.Index.create()
-      astpath = abspath + '.ast'
-      if os.path.isfile(astpath):
-        yield index.read(astpath)
-      else:
-        try:
-          tu = index.parse(abspath, args=args)
-        except:
-          warnings.warn('Failed to parse %s' % abspath)
-          continue
-        if CACHE_AST_FILES:
-          tu.save(abspath + '.ast')
+      tu = parse(abspath, args, xargs)
+      if tu is not None:
         yield tu
 
+def parse(filename, args=DEFAULT_ARGS, xargs=[]):
+  index = cindex.Index.create()
+  astpath = filename + '.ast'
+  if os.path.isfile(astpath):
+    return index.read(astpath)
+  else:
+    try:
+      tu = index.parse(filename, args=args)
+    except:
+      warnings.warn('Failed to parse %s' % filename)
+      return None
+    if CACHE_AST_FILES:
+      tu.save(astpath)
+    return tu

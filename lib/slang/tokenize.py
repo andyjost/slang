@@ -1,9 +1,14 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 from clang import cindex
 from fnmatch import fnmatch
 from itertools import chain, ifilter, dropwhile, takewhile, izip
+import collections
 import sys
+import weakref
+
+# Twice the number if next/prev calls that can be used to find nearby tokens.
+BUFFER_SIZE = 101
 
 __all__ = [
     'cursorize', 'dumpSource', 'dumpTokens', 'filterCursorsByFilename'
@@ -121,6 +126,9 @@ class WhitespaceToken(object):
   @property
   def isNil(self):
     return self.spelling == ''
+  @property
+  def key(self):
+    return self.location.key
   __repr__ = _generic_repr
 
 def cursorize(cursor):
@@ -182,6 +190,45 @@ def _filenameFromCursor(cursor):
   else:
     return cursor._tu.spelling
 
+def linked(inner):
+  '''Adds prev/next members to a stream of tokens to navigate more easily.'''
+  class MyNone(object): pass
+  none = MyNone()
+  def f(*args, **kwds):
+    gen = inner(*args, **kwds)
+    xprev = none
+    for x in gen:
+      x.prev = weakref.ref(xprev)
+      if xprev is not none:
+        xprev.next = weakref.ref(x)
+        yield xprev
+      xprev = x
+    if xprev is not None:
+      xprev.next = weakref.ref(none)
+      yield xprev
+  return f
+
+def buffered(inner):
+  '''Keeps enough tokens around for prev/next to work in a current region.'''
+  def f(*args, **kwds):
+    gen = inner(*args, **kwds)
+    buf = collections.deque(maxlen=BUFFER_SIZE)
+    for i in xrange(BUFFER_SIZE):
+      try:
+        buf.append(gen.next())
+      except StopIteration:
+        for x in buf: yield x
+        return
+    middle = BUFFER_SIZE // 2
+    for i in xrange(middle): yield buf[i]
+    for x in gen:
+      yield buf[middle]
+      buf.append(x)
+    for i in xrange(middle, len(buf)): yield buf[i]
+  return f
+
+@buffered
+@linked
 def tokenize(cursor, **kwds):
   '''
   Produces the complete sequence of tokens associated with the given cursor.
