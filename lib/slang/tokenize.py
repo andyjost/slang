@@ -2,13 +2,14 @@
 
 from clang import cindex
 from fnmatch import fnmatch
-from itertools import chain, ifilter, dropwhile, takewhile, izip
+from itertools import *
+from . import customization
 import collections
 import sys
 import weakref
 
 # Twice the number if next/prev calls that can be used to find nearby tokens.
-BUFFER_SIZE = 101
+BUFFER_SIZE = 1001
 
 __all__ = [
     'cursorize', 'dumpSource', 'dumpTokens', 'filterCursorsByFilename'
@@ -24,57 +25,9 @@ FUNCTION_KINDS = {
   , cindex.CursorKind.DESTRUCTOR
   , cindex.CursorKind.CONVERSION_FUNCTION
   }
-# Order and hash tokens and cursors by their location in the source file.
-cindex.SourceLocation.__lt__ = lambda lhs,rhs: lhs.offset < rhs.offset
-cindex.SourceLocation.__gt__ = lambda lhs,rhs: lhs.offset > rhs.offset
-cindex.SourceLocation.__le__ = lambda lhs,rhs: lhs.offset <= rhs.offset
-cindex.SourceLocation.__ge__ = lambda lhs,rhs: lhs.offset >= rhs.offset
-cindex.SourceLocation.key = property(lambda self: (self.file.name, self.offset))
-cindex.Token.__eq__ = lambda lhs,rhs: lhs.location.__eq__(rhs.location)
-cindex.Token.__ne__ = lambda lhs,rhs: lhs.location.__ne__(rhs.location)
-cindex.Token.__lt__ = lambda lhs,rhs: lhs.location.__lt__(rhs.location)
-cindex.Token.__gt__ = lambda lhs,rhs: lhs.location.__gt__(rhs.location)
-cindex.Token.__le__ = lambda lhs,rhs: lhs.location.__le__(rhs.location)
-cindex.Token.__ge__ = lambda lhs,rhs: lhs.location.__ge__(rhs.location)
-cindex.Token.key = property(lambda self: self.location.key)
-cindex.Token.__hash__ = lambda self: hash(self.key)
-cindex.Cursor.__lt__ = lambda lhs,rhs: lhs.location.__lt__(rhs.location)
-cindex.Cursor.__gt__ = lambda lhs,rhs: lhs.location.__gt__(rhs.location)
-cindex.Cursor.__le__ = lambda lhs,rhs: lhs.location.__le__(rhs.location)
-cindex.Cursor.__ge__ = lambda lhs,rhs: lhs.location.__ge__(rhs.location)
-def Cursor_key(self):
-  if self.location.file is not None:
-    return self.location.key
-  assert self.kind == cindex.CursorKind.TRANSLATION_UNIT
-  return self.spelling
-cindex.Cursor.key = property(Cursor_key)
-cindex.Cursor.__hash__ = lambda self: hash(self.key)
-
-Token__getattribute__old = cindex.Token.__getattribute__
-def Token__getattribute__new(self, name):
-  # Attributes requiring post-processing.
-  attr = Token__getattribute__old(self, name)
-  if name == 'cursor' and attr.kind == cindex.CursorKind.INVALID_FILE:
-    return attr._tu.cursor
-  return attr
-cindex.Token.__getattribute__ = Token__getattribute__new
-
-def _generic_repr(obj):
-  return '<%s: kind=%s, spelling=%s>' % (
-      type(obj).__name__, obj.kind.name, repr(obj.spelling)
-    )
-cindex.Cursor.__repr__ = _generic_repr
-cindex.Token.__repr__ = _generic_repr
-
 def mrca(a, b):
   '''Most-recent common (semantic) ancestor for cursors.'''
   if a is None or b is None: return None
-  # ancestors = {ancestor for ancestor in semanticAncestors(a)}
-  # for x in semanticAncestors(b):
-  #   if x in ancestors:
-  #     return x
-  # assert a._tu.cursor == b._tu.cursor
-  # return a._tu.cursor
   s = set()
   for i,j in izip(semanticAncestors(a), semanticAncestors(b)):
     if i in s: return i
@@ -124,12 +77,15 @@ class WhitespaceToken(object):
   def isLineEnding(self):
     return self.spelling == '\n' or self.spelling == '\\'
   @property
+  def isSpace(self):
+    return self.spelling == ' ' or self.spelling == '\t'
+  @property
   def isNil(self):
     return self.spelling == ''
   @property
   def key(self):
     return self.location.key
-  __repr__ = _generic_repr
+  __repr__ = cindex.Token.__repr__.__func__
 
 def cursorize(cursor):
   yield cursor
@@ -190,21 +146,31 @@ def _filenameFromCursor(cursor):
   else:
     return cursor._tu.spelling
 
+class MyNone(object): pass
+
+class WeakRef(weakref.ref):
+  def __call__(self):
+    obj = weakref.ref.__call__(self)
+    if obj is None:
+      raise RuntimeError('token buffer too small')
+    elif obj is MyNone:
+      return None
+    else:
+      return obj
+
 def linked(inner):
   '''Adds prev/next members to a stream of tokens to navigate more easily.'''
-  class MyNone(object): pass
-  none = MyNone()
   def f(*args, **kwds):
     gen = inner(*args, **kwds)
-    xprev = none
+    xprev = MyNone
     for x in gen:
-      x.prev = weakref.ref(xprev)
-      if xprev is not none:
-        xprev.next = weakref.ref(x)
+      x.prev = WeakRef(xprev)
+      if xprev is not MyNone:
+        xprev.next = WeakRef(x)
         yield xprev
       xprev = x
     if xprev is not None:
-      xprev.next = weakref.ref(none)
+      xprev.next = WeakRef(MyNone)
       yield xprev
   return f
 
@@ -308,27 +274,6 @@ def semanticAncestors(cursor):
   while cursor is not None:
     yield cursor
     cursor = cursor.semantic_parent
-
-def indexOf(cursor):
-  siblings = list(cursor.lexical_parent.get_children())
-  assert sum(1 if s == cursor else 0 for s in siblings) == 1
-  return siblings.index(cursor)
-
-def siblings(cursor):
-  siblings = cursor.lexical_parent.get_children()
-  return (sib for sib in siblings if sib != cursor)
-
-def prior_siblings(cursor):
-  return takewhile(
-      lambda s: s != cursor
-    , cursor.lexical_parent.get_children()
-    )
-
-def subsequent_siblings(cursor):
-  return dropwhile(
-      lambda s: s != cursor
-    , cursor.lexical_parent.get_children()
-    )
 
 def dumpSource(cursor, stream=sys.stdout, **kwds):
   for tok in tokenize(cursor, **kwds):
