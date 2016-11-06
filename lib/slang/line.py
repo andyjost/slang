@@ -2,7 +2,7 @@
 Implements class Line.
 '''
 
-from . import customization
+from .utility import *
 from itertools import *
 from memoized_property import memoized_property as memoprop
 
@@ -27,60 +27,31 @@ def subsequent_siblings(cursor):
     , cursor.lexical_parent.get_children()
     )
 
-def fwdfrom(item):
-  while item:
-    yield item
-    item = item.next()
+class Range(object):
+  '''A range of tokens.'''
+  def __init__(self, get_begin, get_end):
+    self._get_begin = get_begin
+    self._get_end = get_end
 
-def revfrom(item):
-  while item:
-    yield item
-    item = item.prev()
+  @memoprop
+  def begin(self): return self._get_begin()
 
-class Line(object):
-  def __init__(self, token):
-    self._token = token
+  @memoprop
+  def end(self): return self._get_end()
 
   def __iter__(self):
     end = self.end
-    for token in fwdfrom(self.begin):
-      if token == end: return
-      yield token
-
-  @memoprop
-  def begin(self):
-    '''Returns the first token of the line (i.e., after the newline).'''
-    for token in revfrom(self._token.prev()):
-      if getattr(token, 'isLineEnding', False):
-        return token.next()
-    return None
-
-  @memoprop
-  def end(self):
-    '''Returns the last token of the line (i.e., the newline).'''
-    for token in fwdfrom(self._token):
-      if getattr(token, 'isLineEnding', False):
-        return token
-    return None
-
-  @memoprop
-  def indent(self):
-    tokens = takewhile(lambda token: getattr(token, 'isSpace', False), self)
-    return sum(1 for token in tokens)
+    for obj in fwdfrom(self.begin):
+      if obj == end: return
+      yield obj
 
   def __str__(self):
-    return ''.join(token.spelling for token in self)
+    return ''.join(obj.spelling for obj in self)
 
   @memoprop
-  def columns(self): return len(str(self))
-
-  @memoprop
-  def len(self): return sum(1 for token in self)
+  def len(self): return sum(1 for obj in self)
 
   def __len__(self): return self.len
-
-  def prev(self): return Line(self.begin.prev())
-  def next(self): return Line(self.end.next())
 
   def key(self): return (self.begin, self.end)
   def __eq__(self, arg): return self.key == arg.key
@@ -89,4 +60,30 @@ class Line(object):
   def __ge__(self, arg): return self.key >= arg.key
   def __lt__(self, arg): return self.key < arg.key
   def __gt__(self, arg): return self.key > arg.key
+
+
+class Line(Range):
+  def __init__(self, reftoken):
+    def get_begin():
+      for token in revfrom(reftoken.prev()):
+        if getattr(token, 'isLineEnding', False):
+          return token.next()
+      return None
+    def get_end():
+      for token in fwdfrom(reftoken):
+        if getattr(token, 'isLineEnding', False):
+          return token
+      return None
+    Range.__init__(self, get_begin, get_end)
+
+  @memoprop
+  def indent(self):
+    tokens = takewhile(lambda token: getattr(token, 'isSpace', False), self)
+    return sum(1 for token in tokens)
+
+  @memoprop
+  def columns(self): return len(str(self))
+
+  def prev(self): return Line(self.begin.prev())
+  def next(self): return Line(self.end.next())
 

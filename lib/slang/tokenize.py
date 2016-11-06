@@ -3,19 +3,16 @@
 from clang import cindex
 from fnmatch import fnmatch
 from itertools import *
-from . import customization
+from .utility import *
 import collections
 import sys
 import weakref
 
 # Twice the number if next/prev calls that can be used to find nearby tokens.
-BUFFER_SIZE = 1001
+# BUFFER_SIZE = 501
+BUFFER_SIZE = 5
 
-__all__ = [
-    'cursorize', 'dumpSource', 'dumpTokens', 'filterCursorsByFilename'
-  , 'tokenize'
-  , 'FUNCTIONS_KINDS'
-  ]
+# __all__ = ['dumpSource', 'dumpTokens', 'tokenize', 'FUNCTION_KINDS']
 
 FUNCTION_KINDS = {
     cindex.CursorKind.FUNCTION_TEMPLATE
@@ -25,6 +22,10 @@ FUNCTION_KINDS = {
   , cindex.CursorKind.DESTRUCTOR
   , cindex.CursorKind.CONVERSION_FUNCTION
   }
+# METHODS
+# TEMPLATES
+# SPECIAL_METHODS (ctor/dtor)
+
 def mrca(a, b):
   '''Most-recent common (semantic) ancestor for cursors.'''
   if a is None or b is None: return None
@@ -40,6 +41,10 @@ def mrca(a, b):
 cindex.TokenKind.register(100, 'WHITESPACE')
 
 class Eof(Exception): pass
+
+def is_whitespace_char(ch): return ch.isspace() or ch == '\\' or ch == ''
+def is_line_ending(ch): return ch == '\n' or ch == '\\'
+def is_space_char(ch): return ch == ' ' or ch == '\t'
 
 class WhitespaceToken(object):
   def __init__(self, prev_tok, next_tok, source):
@@ -66,19 +71,16 @@ class WhitespaceToken(object):
       )
     self.location = begin
     self.extent = cindex.SourceRange.from_locations(begin, end)
-    if not WhitespaceToken.isWhitespace(self.spelling):
+    if not is_whitespace_char(self.spelling):
       raise ValueError('whitespace expected at %s, got "%s"'
           % (self.location, self.spelling)
         )
-  @staticmethod
-  def isWhitespace(ch):
-    return ch.isspace() or ch == '\\' or ch == ''
   @property
-  def isLineEnding(self):
-    return self.spelling == '\n' or self.spelling == '\\'
+  def isWhitespace(self): return True
   @property
-  def isSpace(self):
-    return self.spelling == ' ' or self.spelling == '\t'
+  def isLineEnding(self): return is_line_ending(self.spelling)
+  @property
+  def isSpace(self): return is_space_char(self.spelling)
   @property
   def isNil(self):
     return self.spelling == ''
@@ -87,20 +89,7 @@ class WhitespaceToken(object):
     return self.location.key
   __repr__ = cindex.Token.__repr__.__func__
 
-def cursorize(cursor):
-  yield cursor
-  for child in cursor.get_children():
-    for c in cursorize(child):
-      yield c
-
-def filterCursorsByFilename(cursors, predicate):
-  def ifilter_predicate(cursor):
-    file = cursor.location.file
-    ans = file is None or predicate(file.name)
-    return ans
-  return ifilter(ifilter_predicate, cursors)
-
-def _getTokens(cursor, source, **kwds):
+def _getTokens(cursor, source, expandby=(0,0), **kwds):
   '''
   Monkey-patches cindex.get_tokens to work around inconsistencies.
 
@@ -114,7 +103,19 @@ def _getTokens(cursor, source, **kwds):
   definition (case 2), the token following the function definition, which
   could be anything, is included.
   '''
-  tokens = sorted(cursor.get_tokens())
+  if expandby != (0,0):
+    extent = cursor.extent
+    start = max(0, extent.start.offset - expandby[0])
+    end = extent.end.offset + expandby[1]
+    tu = cursor._tu
+    f = tu.get_file(source.name)
+    extent = cindex.SourceRange.from_locations(*[
+        cindex.SourceLocation.from_offset(tu, f, start)
+      , cindex.SourceLocation.from_offset(tu, f, end)
+      ])
+    tokens = sorted(cindex.TokenGroup.get_tokens(cursor._tu, extent))
+  else:
+    tokens = sorted(cursor.get_tokens())
   if cursor.kind in FUNCTION_KINDS and tokens and tokens[-1].spelling != ';':
     return tokens[:-1]
   else:
@@ -152,7 +153,7 @@ class WeakRef(weakref.ref):
   def __call__(self):
     obj = weakref.ref.__call__(self)
     if obj is None:
-      raise RuntimeError('token buffer too small')
+      raise RuntimeError('token buffer exhausted')
     elif obj is MyNone:
       return None
     else:
@@ -193,9 +194,17 @@ def buffered(inner):
     for i in xrange(middle, len(buf)): yield buf[i]
   return f
 
+def filtered(inner):
+  def f(*args, **kwds):
+    for token in inner(*args, **kwds):
+      if token is not MyNone:
+        yield token
+  return f
+
+@filtered
 @buffered
 @linked
-def tokenize(cursor, **kwds):
+def tokenize(cursor, expandby=(0,0), **kwds):
   '''
   Produces the complete sequence of tokens associated with the given cursor.
   Inserts whitespace tokens.
@@ -204,22 +213,19 @@ def tokenize(cursor, **kwds):
   filename = _filenameFromCursor(cursor)
   source = open(filename, 'r')
   prev_tok = None
-  raw_tokens = _getTokens(cursor, source, **kwds)
+  predent = kwds.pop('include_predent', None)
+  if predent:
+    offset = cursor.location.offset
+    for i in xrange(offset, -1, -1):
+      source.seek(i)
+      if not is_whitespace_char(source.read(1)):
+        break
+    expandby[0] += offset - i
+  raw_tokens = _getTokens(cursor, source, expandby, **kwds)
   if not raw_tokens: return
-  if kwds.pop('include_predent', None):
-    parent = cursor
-    while parent and parent.extent == cursor.extent:
-      parent = cursor.lexical_parent
-    if parent:
-      assert _filenameFromCursor(parent) == filename
-      more_tokens = sorted(parent.get_tokens())
-      try:
-        ibegin = more_tokens.index(raw_tokens[0])
-      except ValueError:
-        pass
-      else:
-        assert ibegin > 0
-        prev_tok = more_tokens[ibegin-1]
+  if predent:
+    prev_tok = raw_tokens[0]
+    raw_tokens = raw_tokens[1:]
   for next_tok in raw_tokens:
     if prev_tok:
       for ws in _getWsBetween(prev_tok, next_tok, source):

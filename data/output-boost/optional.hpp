@@ -1,35 +1,36 @@
 
-  template <class T, class Factory>
-  inline void construct(Factory const& factory, void* address)
-  {
-    factory.BOOST_NESTED_TEMPLATE apply<T>(address);
-  }
+struct optional_base {};
+  // template <class T, class Factory>
+  // inline void construct(Factory const& factory, void* address)
+  // {
+  //   factory.BOOST_NESTED_TEMPLATE apply<T>(address);
+  // }
 
-    void const* address() const { return &dummy_; }
+    // void const* address() const { return &dummy_; }
 
-    void      * address()       { return &dummy_; }
+    // void      * address()       { return &dummy_; }
 
-    optional_base()
-      :
-      m_initialized(false) {}
+    // optional_base()
+    //   :
+    //   m_initialized(false) {}
 
-    optional_base ( optional_base const& rhs )
-      :
-      m_initialized(false)
-    {
-      if ( rhs.is_initialized() )
-        construct(rhs.get_impl());
-    }
+    // optional_base ( optional_base const& rhs )
+    //   :
+    //   m_initialized(false)
+    // {
+    //   if ( rhs.is_initialized() )
+    //     construct(rhs.get_impl());
+    // }
 
-    template<class Expr>
-    explicit optional_base ( Expr const& expr, Expr const* tag )
-      :
-      m_initialized(false)
-    {
-      construct(expr,tag);
-    }
+    // template<class Expr>
+    // explicit optional_base ( Expr const& expr, Expr const* tag )
+    //   :
+    //   m_initialized(false)
+    // {
+    //   construct(expr,tag);
+    // }
 
-    ~optional_base() { destroy() ; }
+    // ~optional_base() { destroy() ; }
 
     void assign ( optional_base const& rhs )
     {
@@ -56,7 +57,7 @@
 
     void reset() { destroy(); }
 
-    pointer_const_type get_ptr() const { return m_initialized ? get_ptr_impl() : 0 ; }
+    // pointer_const_type get_ptr() const { return m_initialized ? get_ptr_impl() : 0 ; }
 
 
     bool is_initialized() const { return m_initialized ; }
