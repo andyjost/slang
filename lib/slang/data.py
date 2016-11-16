@@ -4,6 +4,7 @@ from clang.cindex import TokenKind, CursorKind
 from .utility import *
 from .tokenize import *
 from . import line
+from .functor import *
 from fnmatch import fnmatch
 import os
 import re
@@ -69,84 +70,68 @@ def select(cursors, preds=[], filename_pattern=None):
     cursors = ifilter(pred, cursors)
   return cursors
 
-def _wrap_unary(op):
-  @functools.wraps(op)
-  def wrapper(arg):
-    if callable(arg):
-      return lambda x: op(arg(x))
-    else:
-      return op(arg)
-  return wrapper
 # def _wrap_unary(op):
 #   @functools.wraps(op)
 #   def wrapper(arg):
-#     assert callable(arg)
-#     return lambda x: op(arg(x))
+#     if callable(arg):
+#       return lambda x: op(arg(x))
+#     else:
+#       return op(arg)
 #   return wrapper
+
+not_ = functor(operator.not_)
+is_ = functor(operator.is_)
+# not_ = _wrap_unary(operator.not_)
+# is_ = _wrap_unary(operator.is_)
+
+# def _wrap_binary(op):
 #   @functools.wraps(op)
 #   def wrapper(*args):
-#     assert len(args) < 2
+#     assert len(args) in [1,2]
 #     try:
-#       (f,) = args
+#       lhs,rhs = args
 #     except ValueError:
-#       return lambda x: op(x)
+#       (rhs,) = args
+#       if callable(rhs):
+#         return lambda x: op(x,rhs(x))
+#       else:
+#         return lambda x: op(x,rhs)
 #     else:
-#       return lambda x: op(f(x))
+#       if callable(lhs):
+#         if callable(rhs):
+#           return lambda x: op(lhs(x),rhs(x))
+#         else:
+#           return lambda x: op(lhs(x),rhs)
+#       else:
+#         if callable(rhs):
+#           return lambda x: op(lhs,rhs(x))
+#         else:
+#           return lambda x: op(lhs,rhs)
 #   return wrapper
-#
-# # not_(): \x -> not x
-# # not_(is_function): \x -> not is_function(x)
-not_ = _wrap_unary(operator.not_)
-is_ = _wrap_unary(operator.is_)
-
-def _wrap_binary(op):
-  @functools.wraps(op)
-  def wrapper(*args):
-    assert len(args) in [1,2]
-    try:
-      lhs,rhs = args
-    except ValueError:
-      (rhs,) = args
-      if callable(rhs):
-        return lambda x: op(x,rhs(x))
-      else:
-        return lambda x: op(x,rhs)
-    else:
-      if callable(lhs):
-        if callable(rhs):
-          return lambda x: op(lhs(x),rhs(x))
-        else:
-          return lambda x: op(lhs(x),rhs)
-      else:
-        if callable(rhs):
-          return lambda x: op(lhs,rhs(x))
-        else:
-          return lambda x: op(lhs,rhs)
-  return wrapper
 
 # lt(line_length, 80): \x -> line_length(x) < 80
-lt = _wrap_binary(operator.lt)
-gt = _wrap_binary(operator.gt)
-ge = _wrap_binary(operator.ge)
-le = _wrap_binary(operator.le)
-eq = _wrap_binary(operator.eq)
-ne = _wrap_binary(operator.ne)
-and_ = _wrap_binary(operator.and_)
-or_ = _wrap_binary(operator.or_)
+lt = functor(operator.lt)
+gt = functor(operator.gt)
+ge = functor(operator.ge)
+le = functor(operator.le)
+eq = functor(operator.eq)
+ne = functor(operator.ne)
+and_ = functor(operator.and_)
+or_ = functor(operator.or_)
 
 def uselect(*args, **kwds):
   return unitize(select(*args, **kwds))
 
-@_wrap_unary
+@functor
 def is_function(cursor):
   return cursor.kind in FUNCTION_KINDS
 
-@_wrap_unary
+@functor
 def function_body(cursor):
   assert is_function(cursor)
   return uselect(cursorize(cursor), [is_compound_stmt])
 
-@_wrap_unary
+@functor
 def is_definition(cursor):
   if not is_function(cursor): return False
   children = list(cursor.get_children())
@@ -154,29 +139,29 @@ def is_definition(cursor):
   assert result == cursor.is_definition()
   return result
 
-@_wrap_unary
+@functor
 def function_has_empty_body(cursor):
   body = function_body(cursor)
   return empty(select(cursorize(body), [ne(body)]))
 
-@_wrap_unary
+@functor
 def function_body_stmts(cursor):
   body = function_body(cursor)
   return sum(1 for _ in body.children)
 
-@_wrap_unary
+@functor
 def is_compound_stmt(cursor):
   return cursor.kind == cindex.CursorKind.COMPOUND_STMT
 
-@_wrap_unary
+@functor
 def owned_by(cursor):
   return lambda obj: cursor == Cursor(obj)
 
-@_wrap_binary
+@functor
 def is_kind(cursor, kind):
   return cursor.kind == kind
 
-@_wrap_unary
+@functor
 def is_class_like(cursor):
   return cursor.kind in (
       CursorKind.CLASS_DECL
@@ -184,7 +169,7 @@ def is_class_like(cursor):
     , CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION
     )
 
-@_wrap_unary
+@functor
 def is_constructor(cursor):
   if cursor.kind == CursorKind.CONSTRUCTOR:
     return True
@@ -196,38 +181,39 @@ def is_constructor(cursor):
       return basename(parent.spelling) == basename(cursor.spelling)
   return False
 
-def is_spelled(spelling):
-  return lambda obj: spelling == obj.spelling
+@functor
+def is_spelled(obj, spelling):
+  return obj.spelling == spelling
 
-@_wrap_binary
+@functor
 def contains_keyword(cursor, spelling):
   found = select(
-      cursor.tokens, [is_kind(TokenKind.KEYWORD), is_spelled(spelling)]
+      cursor.tokens, [is_kind(_arg_, TokenKind.KEYWORD), is_spelled(_arg_, spelling)]
     )
   return not empty(found)
 
-@_wrap_unary
+@functor
 def is_whitespace(token):
   try:
     return token.isWhitespace
   except AttributeError:
     return False
 
-@_wrap_unary
+@functor
 def is_space(token):
   try:
     return token.isSpace
   except AttributeError:
     return False
 
-@_wrap_unary
+@functor
 def is_line_end(token):
   try:
     return token.isLineEnding
   except AttributeError:
     return False
 
-@_wrap_unary
+@functor
 def length_as_single_line(cursor):
   counting = True # To skip strings of whitespace.
   length = 0
@@ -241,10 +227,10 @@ def length_as_single_line(cursor):
       length += len(token.spelling)
   return length
 
-@_wrap_unary
+@functor
 def function_has_newline_before_body(cursor):
   body = function_body(cursor)
-  p = uselect(cursor.tokens, [owned_by(body), is_spelled('{')])
+  p = uselect(cursor.tokens, [owned_by(body), is_spelled(_arg_, '{')])
   prev = uselect(revfrom(p.prev()), [or_(not_(is_whitespace), is_line_end)])
   return is_line_end(prev)
 
@@ -273,6 +259,7 @@ def entropy(p):
   return (p*math.log(p) + q*math.log(q)) / -math.log(2)
 
 def entropic_quality(seq, what, given=[], *args, **kwds):
+  '''Quality function between 0 and 1.'''
   a = entropy(probability(seq, what, given, *args, **kwds))
   not_given = reduce(lambda a,b: or_(a, not_(b)), given, lambda *args: False)
   b = entropy(probability(seq, what, [not_given], *args, **kwds))

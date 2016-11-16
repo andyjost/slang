@@ -1,0 +1,30 @@
+# Placeholder
+__all__ = ['_arg_', 'functor']
+
+_arg_ = type('Arg', (), {})()
+
+class functor(object):
+  def __new__(cls, f):
+    return f if isinstance(f, functor) else object.__new__(cls)
+  def __init__(self, f):
+    if f is not self:
+      self.f = f
+  def __call__(self, *args):
+    f_ = object.__getattribute__(self, 'f')
+    if any(callable(arg) or arg is _arg_ for arg in args):
+      def wrapped(x):
+        deref = lambda y: y(x) if callable(y) else x if y is _arg_ else y
+        args_ = [deref(arg) for arg in args]
+        return f_(*args_)
+      return wrapped
+    else:
+      return f_(*args)
+  def __getattribute__(self, name):
+    return getattr(object.__getattribute__(self, 'f'), name)
+  def __or__(lhs, rhs): return functor(lambda l,r: l or r)(lhs, functor(rhs))
+  def __ror__(rhs, lhs): return functor(lambda l,r: l or r)(functor(lhs), rhs)
+  def __and__(lhs, rhs): return functor(lambda l,r: l and r)(lhs, functor(rhs))
+  def __rand__(rhs, lhs): return functor(lambda l,r: l and r)(functor(lhs), rhs)
+  def __inv__(self): return functor(lambda l: not l)(self)
+
+
