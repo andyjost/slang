@@ -1,0 +1,136 @@
+#!/usr/bin/env python
+from slang.data import *
+from slang.tokenize import *
+import collections
+from slang.line import Line
+import sys
+import pdb
+
+from clang.cindex import CursorKind, TokenKind
+
+def interact(): pdb.set_trace()
+
+def pp(seq):
+  for x in seq: print x
+
+positive = []
+def getpos(item):
+  positive.append(item)
+  # print item.kind
+  # pdb.set_trace()
+
+negative = []
+def getneg(item):
+  negative.append(item)
+  # pdb.set_trace()
+
+getters = dict(on_true=getpos, on_false=getneg)
+
+
+idx = SourceIndex('./boost/optional/', args=['-I.'])
+cursors = tuple(idx.cursors([is_definition]))
+print '# of functions:', len(cursors)
+def p(out=None, given=[]):
+  positive[:] = []
+  negative[:] = []
+  prob = probability(cursors, function_has_newline_before_body, given, **getters)
+  if out:
+    print >>out, 'P=', prob
+    print >>out, "POSITIVE:"
+    for item in positive:
+      print >>out, item
+    print >>out, ''
+    print >>out, "NEGATIVE:"
+    for item in negative:
+      print >>out, item
+  return prob
+
+def e(given=[]):
+  return entropic_quality(cursors, function_has_newline_before_body, given)
+
+# print 'p|nothing', p()
+# print 'p|method', p([is_kind(CursorKind.CXX_METHOD)])
+# print 'p|<81&method', p([lt(length_as_single_line,80), is_kind(CursorKind.CXX_METHOD)])
+# print 'p|1stmt&method', p([lt(function_body_stmts,2), is_kind(CursorKind.CXX_METHOD)])
+# print 'p|!1stmt&method', p([not_(or_(lt(function_body_stmts,2), is_kind(CursorKind.CXX_METHOD)))])
+
+def go(length):
+  true = lambda *args: True
+  false = lambda *args: False
+  conditions = [
+      or_(
+        is_kind(CursorKind.CXX_METHOD)
+      , or_(
+            is_constructor
+          , or_(
+              is_kind(CursorKind.DESTRUCTOR)
+            , is_kind(CursorKind.CONVERSION_FUNCTION)
+            )
+          )
+      )
+    , not_(contains_keyword(function_body, 'if'))
+    , lt(function_body_stmts, 3)
+    , lt(length_as_single_line, length)
+    ]
+  print length, ':', e(conditions)
+
+# 115 best
+# for i in xrange(110, 130):
+#   go(i)
+go(115)
+
+# p(file('a','w'), conditions)
+# p(file('b','w'), [not_conditions])
+# print 'p|no-body', p(given=[function_has_empty_body])
+# for i in xrange(75,85):
+#   print 'p|<%s' % i, p([lt(length_as_single_line, i)])
+# for i in xrange(75,85):
+#   print 'p|no-body&<%s' % i, \
+#     p([function_has_empty_body, lt(length_as_single_line, i)])
+# for i in xrange(75,85):
+#   print 'p|no-body|<%s' % i, \
+#     p([or_(function_has_empty_body, lt(length_as_single_line, i))])
+
+
+# one = open('one.txt', 'w')
+# two = open('two.txt', 'w')
+# print 'p|nothing', p(
+#     on_true=lambda cur: (one.write(str(cur)), one.write('\n\n'))
+#   , on_false=lambda cur: (two.write(str(cur)), two.write('\n\n'))
+#   )
+
+# for c in cursors:
+#   if not function_has_newline_before_body(c):
+#     compound = uselect(cursorize(c), [is_compound_stmt])
+#     if len(str(compound) < 4):
+#       interact()
+
+# for l in cursor.lines:
+#   print l
+# tokens = cursor.tokens
+# tokens = tuple(tokenize.tokenize(cursor))
+# lines = tuple(cursor.lines)
+# for t in tokens:
+#   sys.stdout.write(t.spelling)
+
+# module = 'output-boost/optional.hpp'
+# tu = data.parseFile(module)
+# index = {t.key:t for t in tokenize.tokenize(tu.cursor)}
+# gen = tokenize.tokenize(tu.cursor)
+# toks = list(gen)
+# t = toks[544]
+# line = Line(t)
+# #
+# cursors = cursorize(tu.cursor)
+# # cursors = ifilter(lambda c: c.kind in tokenize.FUNCTION_KINDS)
+# for c in sorted(cursors):
+#   start = c.extent.start
+#   end = c.extent.end
+#
+#   print c, '\n    ' \
+#       , start.line, ':', start.column, '->' \
+#       , end.line, ":", end.column
+#
+# for d in tu.diagnostics:
+#     print d
+

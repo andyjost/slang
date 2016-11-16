@@ -1,5 +1,6 @@
 from __future__ import division
 from clang import cindex
+from clang.cindex import TokenKind, CursorKind
 from .utility import *
 from .tokenize import *
 from . import line
@@ -12,6 +13,7 @@ from itertools import *
 from memoized_property import memoized_property as memoprop
 import operator
 import functools
+import math
 
 # These can be quite large.
 CACHE_AST_FILES = False
@@ -70,9 +72,17 @@ def select(cursors, preds=[], filename_pattern=None):
 def _wrap_unary(op):
   @functools.wraps(op)
   def wrapper(arg):
-    assert callable(arg)
-    return lambda x: op(arg(x))
+    if callable(arg):
+      return lambda x: op(arg(x))
+    else:
+      return op(arg)
   return wrapper
+# def _wrap_unary(op):
+#   @functools.wraps(op)
+#   def wrapper(arg):
+#     assert callable(arg)
+#     return lambda x: op(arg(x))
+#   return wrapper
 #   @functools.wraps(op)
 #   def wrapper(*args):
 #     assert len(args) < 2
@@ -127,54 +137,116 @@ or_ = _wrap_binary(operator.or_)
 def uselect(*args, **kwds):
   return unitize(select(*args, **kwds))
 
+@_wrap_unary
 def is_function(cursor):
   return cursor.kind in FUNCTION_KINDS
 
-def is_function_with_body(cursor):
+@_wrap_unary
+def function_body(cursor):
+  assert is_function(cursor)
+  return uselect(cursorize(cursor), [is_compound_stmt])
+
+@_wrap_unary
+def is_definition(cursor):
   if not is_function(cursor): return False
   children = list(cursor.get_children())
-  return children and is_compound_stmt(children[-1])
+  result = children and is_compound_stmt(children[-1])
+  assert result == cursor.is_definition()
+  return result
 
+@_wrap_unary
 def function_has_empty_body(cursor):
-  body = uselect(cursorize(cursor), [is_compound_stmt])
+  body = function_body(cursor)
   return empty(select(cursorize(body), [ne(body)]))
 
+@_wrap_unary
+def function_body_stmts(cursor):
+  body = function_body(cursor)
+  return sum(1 for _ in body.children)
+
+@_wrap_unary
 def is_compound_stmt(cursor):
   return cursor.kind == cindex.CursorKind.COMPOUND_STMT
 
+@_wrap_unary
 def owned_by(cursor):
   return lambda obj: cursor == Cursor(obj)
 
-def is_kind(kind):
-  return lambda obj: kind == obj.kind
+@_wrap_binary
+def is_kind(cursor, kind):
+  return cursor.kind == kind
+
+@_wrap_unary
+def is_class_like(cursor):
+  return cursor.kind in (
+      CursorKind.CLASS_DECL
+    , CursorKind.CLASS_TEMPLATE
+    , CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION
+    )
+
+@_wrap_unary
+def is_constructor(cursor):
+  if cursor.kind == CursorKind.CONSTRUCTOR:
+    return True
+  if cursor.kind == CursorKind.FUNCTION_TEMPLATE:
+    parent = cursor.semantic_parent
+    if parent and is_class_like(parent):
+      # E.g., 'optional<T>' -> 'optional'
+      basename = lambda s: s.split('<')[0]
+      return basename(parent.spelling) == basename(cursor.spelling)
+  return False
 
 def is_spelled(spelling):
   return lambda obj: spelling == obj.spelling
 
+@_wrap_binary
+def contains_keyword(cursor, spelling):
+  found = select(
+      cursor.tokens, [is_kind(TokenKind.KEYWORD), is_spelled(spelling)]
+    )
+  return not empty(found)
+
+@_wrap_unary
 def is_whitespace(token):
   try:
     return token.isWhitespace
   except AttributeError:
     return False
 
+@_wrap_unary
 def is_space(token):
   try:
     return token.isSpace
   except AttributeError:
     return False
 
+@_wrap_unary
 def is_line_end(token):
   try:
     return token.isLineEnding
   except AttributeError:
     return False
 
+@_wrap_unary
+def length_as_single_line(cursor):
+  counting = True # To skip strings of whitespace.
+  length = 0
+  for token in cursor.tokens:
+    if is_whitespace(token):
+      if counting:
+        length += 1
+        counting = False
+    else:
+      counting = True
+      length += len(token.spelling)
+  return length
+
+@_wrap_unary
 def function_has_newline_before_body(cursor):
-  begin = uselect(cursor.tokens, [owned_by(cursor), is_spelled(')')])
-  compound = uselect(cursorize(cursor), [is_compound_stmt])
-  end = first(compound.tokens, assert_=[is_spelled('{')])
-  it = select(fwduntil(begin, end), [is_line_end])
-  return not empty(it)
+  body = function_body(cursor)
+  p = uselect(cursor.tokens, [owned_by(body), is_spelled('{')])
+  prev = uselect(revfrom(p.prev()), [or_(not_(is_whitespace), is_line_end)])
+  return is_line_end(prev)
 
 def probability(
     seq, what, given=[]
@@ -194,18 +266,17 @@ def probability(
     return None
   return positive / total
 
-def length_as_single_line(cursor):
-  counting = True # To skip strings of whitespace.
-  length = 0
-  for token in cursor.tokens:
-    if is_whitespace(token):
-      if counting:
-        length += 1
-        counting = False
-    else:
-      counting = True
-      length += len(token.spelling)
-  return length
+def entropy(p):
+  assert 0 <= p <= 1
+  if p == 1: return 0
+  q = 1 - p
+  return (p*math.log(p) + q*math.log(q)) / -math.log(2)
+
+def entropic_quality(seq, what, given=[], *args, **kwds):
+  a = entropy(probability(seq, what, given, *args, **kwds))
+  not_given = reduce(lambda a,b: or_(a, not_(b)), given, lambda *args: False)
+  b = entropy(probability(seq, what, [not_given], *args, **kwds))
+  return (a + b) / 2
 
 class SourceIndex(object):
   def __init__(self, source, args=[]):
