@@ -1,20 +1,11 @@
-from __future__ import division
 from clang import cindex
-from clang.cindex import TokenKind, CursorKind
-from .utility import *
-from .tokenize import *
-from . import line
-from .functor import *
 from fnmatch import fnmatch
-import os
-import re
-import sys
-import warnings
-from itertools import *
+from . import line
 from memoized_property import memoized_property as memoprop
-import operator
-import functools
-import math
+from .tokenize import *
+from .utility import *
+import os
+import warnings
 
 # These can be quite large.
 CACHE_AST_FILES = False
@@ -50,8 +41,8 @@ def parseFile(filename, args=[]):
       msg = "%d diagnostic message(s) when parsing %s" \
           % (len(tu.diagnostics), filename)
       warnings.warn(msg)
-      for msg in tu.diagnostics:
-        print >>sys.stderr, msg
+      for diag in tu.diagnostics:
+        warnings.warn(diag)
     return tu
 
 def filterCursorsByFilename(cursors, predicate):
@@ -60,210 +51,6 @@ def filterCursorsByFilename(cursors, predicate):
     ans = file is None or predicate(file.name)
     return ans
   return ifilter(ifilter_predicate, cursors)
-
-def select(cursors, preds=[], filename_pattern=None):
-  if filename_pattern is not None:
-    cursors = filterCursorsByFilename(
-        cursors, lambda filename: re.match(filename_pattern, filename)
-      )
-  for pred in preds:
-    cursors = ifilter(pred, cursors)
-  return cursors
-
-# def _wrap_unary(op):
-#   @functools.wraps(op)
-#   def wrapper(arg):
-#     if callable(arg):
-#       return lambda x: op(arg(x))
-#     else:
-#       return op(arg)
-#   return wrapper
-
-not_ = functor(operator.not_)
-is_ = functor(operator.is_)
-# not_ = _wrap_unary(operator.not_)
-# is_ = _wrap_unary(operator.is_)
-
-# def _wrap_binary(op):
-#   @functools.wraps(op)
-#   def wrapper(*args):
-#     assert len(args) in [1,2]
-#     try:
-#       lhs,rhs = args
-#     except ValueError:
-#       (rhs,) = args
-#       if callable(rhs):
-#         return lambda x: op(x,rhs(x))
-#       else:
-#         return lambda x: op(x,rhs)
-#     else:
-#       if callable(lhs):
-#         if callable(rhs):
-#           return lambda x: op(lhs(x),rhs(x))
-#         else:
-#           return lambda x: op(lhs(x),rhs)
-#       else:
-#         if callable(rhs):
-#           return lambda x: op(lhs,rhs(x))
-#         else:
-#           return lambda x: op(lhs,rhs)
-#   return wrapper
-
-# lt(line_length, 80): \x -> line_length(x) < 80
-lt = functor(operator.lt)
-gt = functor(operator.gt)
-ge = functor(operator.ge)
-le = functor(operator.le)
-eq = functor(operator.eq)
-ne = functor(operator.ne)
-and_ = functor(operator.and_)
-or_ = functor(operator.or_)
-
-def uselect(*args, **kwds):
-  return unitize(select(*args, **kwds))
-
-@functor
-def is_function(cursor):
-  return cursor.kind in FUNCTION_KINDS
-
-@functor
-def function_body(cursor):
-  assert is_function(cursor)
-  return uselect(cursorize(cursor), [is_compound_stmt])
-
-@functor
-def is_definition(cursor):
-  if not is_function(cursor): return False
-  children = list(cursor.get_children())
-  result = children and is_compound_stmt(children[-1])
-  assert result == cursor.is_definition()
-  return result
-
-@functor
-def function_has_empty_body(cursor):
-  body = function_body(cursor)
-  return empty(select(cursorize(body), [ne(body)]))
-
-@functor
-def function_body_stmts(cursor):
-  body = function_body(cursor)
-  return sum(1 for _ in body.children)
-
-@functor
-def is_compound_stmt(cursor):
-  return cursor.kind == cindex.CursorKind.COMPOUND_STMT
-
-@functor
-def owned_by(cursor):
-  return lambda obj: cursor == Cursor(obj)
-
-@functor
-def is_kind(cursor, kind):
-  return cursor.kind == kind
-
-@functor
-def is_class_like(cursor):
-  return cursor.kind in (
-      CursorKind.CLASS_DECL
-    , CursorKind.CLASS_TEMPLATE
-    , CursorKind.CLASS_TEMPLATE_PARTIAL_SPECIALIZATION
-    )
-
-@functor
-def is_constructor(cursor):
-  if cursor.kind == CursorKind.CONSTRUCTOR:
-    return True
-  if cursor.kind == CursorKind.FUNCTION_TEMPLATE:
-    parent = cursor.semantic_parent
-    if parent and is_class_like(parent):
-      # E.g., 'optional<T>' -> 'optional'
-      basename = lambda s: s.split('<')[0]
-      return basename(parent.spelling) == basename(cursor.spelling)
-  return False
-
-@functor
-def is_spelled(obj, spelling):
-  return obj.spelling == spelling
-
-@functor
-def contains_keyword(cursor, spelling):
-  found = select(
-      cursor.tokens, [is_kind(_arg_, TokenKind.KEYWORD), is_spelled(_arg_, spelling)]
-    )
-  return not empty(found)
-
-@functor
-def is_whitespace(token):
-  try:
-    return token.isWhitespace
-  except AttributeError:
-    return False
-
-@functor
-def is_space(token):
-  try:
-    return token.isSpace
-  except AttributeError:
-    return False
-
-@functor
-def is_line_end(token):
-  try:
-    return token.isLineEnding
-  except AttributeError:
-    return False
-
-@functor
-def length_as_single_line(cursor):
-  counting = True # To skip strings of whitespace.
-  length = 0
-  for token in cursor.tokens:
-    if is_whitespace(token):
-      if counting:
-        length += 1
-        counting = False
-    else:
-      counting = True
-      length += len(token.spelling)
-  return length
-
-@functor
-def function_has_newline_before_body(cursor):
-  body = function_body(cursor)
-  p = uselect(cursor.tokens, [owned_by(body), is_spelled(_arg_, '{')])
-  prev = uselect(revfrom(p.prev()), [or_(not_(is_whitespace), is_line_end)])
-  return is_line_end(prev)
-
-def probability(
-    seq, what, given=[]
-  , on_true=lambda _:None, on_false=lambda _:None
-  ):
-  total = 0
-  positive = 0
-  for item in seq:
-    if all(condition(item) for condition in given):
-      total += 1
-      if what(item):
-        on_true(item)
-        positive += 1
-      else:
-        on_false(item)
-  if total == 0:
-    return None
-  return positive / total
-
-def entropy(p):
-  assert 0 <= p <= 1
-  if p == 1: return 0
-  q = 1 - p
-  return (p*math.log(p) + q*math.log(q)) / -math.log(2)
-
-def entropic_quality(seq, what, given=[], *args, **kwds):
-  '''Quality function between 0 and 1.'''
-  a = entropy(probability(seq, what, given, *args, **kwds))
-  not_given = reduce(lambda a,b: or_(a, not_(b)), given, lambda *args: False)
-  b = entropy(probability(seq, what, [not_given], *args, **kwds))
-  return (a + b) / 2
 
 class SourceIndex(object):
   def __init__(self, source, args=[]):

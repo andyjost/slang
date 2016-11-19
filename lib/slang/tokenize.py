@@ -12,20 +12,6 @@ import weakref
 # BUFFER_SIZE = 501
 BUFFER_SIZE = 5
 
-# __all__ = ['dumpSource', 'dumpTokens', 'tokenize', 'FUNCTION_KINDS']
-
-FUNCTION_KINDS = {
-    cindex.CursorKind.FUNCTION_TEMPLATE
-  , cindex.CursorKind.FUNCTION_DECL
-  , cindex.CursorKind.CXX_METHOD
-  , cindex.CursorKind.CONSTRUCTOR
-  , cindex.CursorKind.DESTRUCTOR
-  , cindex.CursorKind.CONVERSION_FUNCTION
-  }
-# METHODS
-# TEMPLATES
-# SPECIAL_METHODS (ctor/dtor)
-
 def mrca(a, b):
   '''Most-recent common (semantic) ancestor for cursors.'''
   if a is None or b is None: return None
@@ -38,7 +24,7 @@ def mrca(a, b):
   assert a._tu.cursor == b._tu.cursor
   return a._tu.cursor
 
-cindex.TokenKind.register(100, 'WHITESPACE')
+TokenKind.register(100, 'WHITESPACE')
 
 class Eof(Exception): pass
 
@@ -55,7 +41,7 @@ class WhitespaceToken(object):
     offset = source.tell()
     self.spelling = source.read(1)
     if self.spelling == '': raise Eof()
-    self.kind = cindex.TokenKind.WHITESPACE
+    self.kind = TokenKind.WHITESPACE
     if next_tok is None:
       self.cursor = list(semanticAncestors(prev_tok.cursor))[-1]
     else:

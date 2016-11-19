@@ -1,3 +1,19 @@
+from clang.cindex import CursorKind, TokenKind
+import itertools
+import re
+
+FUNCTION_KINDS = {
+    CursorKind.FUNCTION_TEMPLATE
+  , CursorKind.FUNCTION_DECL
+  , CursorKind.CXX_METHOD
+  , CursorKind.CONSTRUCTOR
+  , CursorKind.DESTRUCTOR
+  , CursorKind.CONVERSION_FUNCTION
+  }
+# METHODS
+# TEMPLATES
+# SPECIAL_METHODS (ctor/dtor)
+
 def asserted(inner):
   def nested(*args, **kwds):
     asserts = kwds.pop('assert_', [])
@@ -53,3 +69,16 @@ def unitize(seq):
     raise TypeError('expected a sequence with one element')
   except:
     return it
+
+def select(cursors, preds=[], filename_pattern=None):
+  if filename_pattern is not None:
+    cursors = filterCursorsByFilename(
+        cursors, lambda filename: re.match(filename_pattern, filename)
+      )
+  for pred in preds:
+    cursors = itertools.ifilter(pred, cursors)
+  return cursors
+
+def uselect(*args, **kwds):
+  return unitize(select(*args, **kwds))
+
