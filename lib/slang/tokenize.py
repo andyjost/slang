@@ -200,14 +200,15 @@ def tokenize(cursor, expandby=(0,0), **kwds):
   source = open(filename, 'r')
   prev_tok = None
   predent = kwds.pop('include_predent', None)
+  expandby_ = list(expandby)
   if predent:
     offset = cursor.location.offset
     for i in xrange(offset, -1, -1):
       source.seek(i)
       if not is_whitespace_char(source.read(1)):
         break
-    expandby[0] += offset - i
-  raw_tokens = _getTokens(cursor, source, expandby, **kwds)
+    expandby_[0] += offset - i
+  raw_tokens = _getTokens(cursor, source, expandby_, **kwds)
   if not raw_tokens: return
   if predent:
     prev_tok = raw_tokens[0]

@@ -38,9 +38,8 @@ def entropy(p):
   q = 1 - p
   return (p*math.log(p) + q*math.log(q)) / -math.log(2)
 
-def entropic_quality(seq, what, given=true, *args, **kwds):
+def gain(seq, what, given=true, *args, **kwds):
   a = entropy(probability(seq, what, given, *args, **kwds))
-  # not_given = reduce(lambda a,b: or_(a, not_(b)), given, lambda *args: False)
   b = entropy(probability(seq, what, ~given, *args, **kwds))
   return (a + b) / 2
 
