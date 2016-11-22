@@ -9,6 +9,7 @@ import warnings
 
 # These can be quite large.
 CACHE_AST_FILES = False
+VERBOSE = False
 
 # Set up include directories.
 #    '-nostdinc', '-nostdinc++'
@@ -37,12 +38,12 @@ def parseFile(filename, args=[]):
       raise
     if CACHE_AST_FILES:
       tu.save(astpath)
-    if len(tu.diagnostics):
+    if VERBOSE and len(tu.diagnostics):
       msg = "%d diagnostic message(s) when parsing %s" \
           % (len(tu.diagnostics), filename)
       warnings.warn(msg)
       for diag in tu.diagnostics:
-        warnings.warn(diag)
+        print >>sys.stderr, diag.spelling
     return tu
 
 def filterCursorsByFilename(cursors, predicate):
@@ -53,17 +54,18 @@ def filterCursorsByFilename(cursors, predicate):
   return ifilter(ifilter_predicate, cursors)
 
 class SourceIndex(object):
-  def __init__(self, source, args=[]):
-    self.source = source
+  def __init__(self, inputs, args=[]):
+    self.inputs = [inputs] if isinstance(inputs, str) else list(inputs)
     self.args = args
 
   @property
   def translation_units(self):
-    if os.path.isdir(self.source):
-      return parseDirectory(self.source)
-    if os.path.isfile(self.source):
-      return iter([parseFile(self.source)])
-    return []
+    for item in self.inputs:
+      if os.path.isdir(item):
+        for x in parseDirectory(item):
+          yield x
+      if os.path.isfile(item):
+        yield parseFile(item)
 
   def cursors(self, preds=[]):
     for tu in self.translation_units:
@@ -114,9 +116,8 @@ class Cursor(object):
     dist = BUFFER_SIZE // 2
     return tuple(tokenize(self.cursor, expandby=(dist,dist)))
 
-  # def __str__(self): return str(self.cursor)
-  def __str__(self):
-    return ''.join([t.spelling for t in self.tokens])
+  def __str__(self): return str(self.cursor)
+  # def __str__(self): return ''.join([t.spelling for t in self.tokens])
   def __repr__(self): return repr(self.cursor)
   def __eq__(self, other): return self.cursor == Cursor(other).cursor
   def __ne__(self, other): return self.cursor != Cursor(other).cursor
@@ -124,6 +125,10 @@ class Cursor(object):
   def __ge__(self, other): return self.cursor >= Cursor(other).cursor
   def __lt__(self, other): return self.cursor < Cursor(other).cursor
   def __gt__(self, other): return self.cursor > Cursor(other).cursor
+
+  @property
+  def source(self):
+    return ''.join([t.spelling for t in self.tokens])
 
 def cursorize(cursor):
   cursor = getattr(cursor, 'cursor', cursor)
