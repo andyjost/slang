@@ -1,24 +1,16 @@
 #!/usr/bin/env python
-from clang.cindex import CursorKind, TokenKind
 from itertools import *
-from sklearn.naive_bayes import *
-from sklearn import preprocessing
-from sklearn.neural_network import MLPClassifier
-from slang.analysis import *
-from slang.data import *
-from slang.functors import *
-from slang.line import Line
-from slang.tokenize import *
 from sklearn import datasets
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV
+from sklearn import preprocessing
+from sklearn import svm
 from sklearn.metrics import classification_report
-import collections
+from sklearn.model_selection import GridSearchCV
+from sklearn.naive_bayes import *
+from sklearn.neural_network import MLPClassifier
 import numpy as np
-import operator
-import pdb
-import sys
-import code
+import warnings
+
+warnings.simplefilter('ignore')
 
 def report(classifier, data, target):
   y_pred = classifier.fit(data, target).predict(data)
@@ -36,6 +28,13 @@ print 'Naive Bayes'.center(80)
 print '=' * 80
 nb = MultinomialNB()
 report(nb, data, target)
+
+print
+print '=' * 80
+print 'SVM'.center(80)
+print '=' * 80
+classifier = svm.SVC()
+report(classifier, data, target)
 
 print
 print '=' * 80
