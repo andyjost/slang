@@ -1,0 +1,350 @@
+boost/intrusive/sgtree_algorithms.hpp:         //in the paper. Authors claim that this method
+boost/serialization/is_bitwise_serializable.hpp://  Authors: Matthias Troyer
+boost/signals2/variadic_signal.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/signals2/detail/variadic_slot_invoker.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/signals2/detail/signals_common_macros.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/signals2/connection.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/signals2/preprocessed_signal.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/signals2/signal_type.hpp:  Author: Frank Mori Hess <fmhess@users.sourceforge.net>
+boost/property_map/compose_property_map.hpp:// Authors: Guillaume Pinot
+boost/property_map/parallel/local_property_map.hpp://  Authors: Douglas Gregor
+boost/property_map/parallel/global_index_map.hpp://  Authors: Douglas Gregor
+boost/property_map/parallel/caching_property_map.hpp://  Authors: Douglas Gregor
+boost/property_map/parallel/distributed_property_map.hpp://  Authors: Douglas Gregor
+boost/property_map/shared_array_property_map.hpp://  Authors: Jeremiah Willcock, Andrew Lumsdaine
+boost/property_map/dynamic_property_map.hpp://  Authors: Doug Gregor
+boost/property_map/function_property_map.hpp:// Author: Philipp Moeller
+boost/property_map/transform_value_property_map.hpp:// Author: Philipp Moeller
+boost/property_map/property_map.hpp://  Authors: Douglas Gregor and Jeremy Siek
+boost/multi_array/subarray.hpp://  Authors: Ronald Garcia
+boost/multi_array/extent_gen.hpp://  Authors: Ronald Garcia
+boost/multi_array/base.hpp://  Authors: Ronald Garcia
+boost/multi_array/index_gen.hpp://  Authors: Ronald Garcia
+boost/multi_array/iterator.hpp://  Authors: Ronald Garcia
+boost/multi_array/copy_array.hpp://  Authors: Ronald Garcia
+boost/multi_array/algorithm.hpp://  Authors: Ronald Garcia
+boost/multi_array/concept_checks.hpp://  Authors: Ronald Garcia
+boost/multi_array/view.hpp://  Authors: Ronald Garcia
+boost/multi_array/storage_order.hpp://  Authors: Ronald Garcia
+boost/multi_array/collection_concept.hpp://  Authors: Ronald Garcia
+boost/multi_array/multi_array_ref.hpp://  Authors: Ronald Garcia
+boost/multi_array/range_list.hpp://  Authors: Ronald Garcia
+boost/multi_array/extent_range.hpp://  Authors: Ronald Garcia
+boost/multi_array/types.hpp://  Authors: Ronald Garcia
+boost/multi_array/index_range.hpp://  Authors: Ronald Garcia
+boost/interprocess/detail/win32_api.hpp:      /* [in] */ const wchar_t * strAuthority,
+boost/interprocess/detail/win32_api.hpp:            0,           // Authority
+boost/pending/mutable_queue.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/pending/disjoint_sets.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/pending/is_heap.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/pending/mutable_heap.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/pending/indirect_cmp.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/pending/relaxed_heap.hpp://  Authors: Douglas Gregor
+boost/pending/bucket_sorter.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/iostreams/slice.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/adapter/filter_adapter.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/adapter/device_adapter.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/execute.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/absolute_path.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/file_handle.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/functional.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/config/fpos.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/config/rtl.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/current_directory.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/path.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/detail/restrict_impl.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/filter/grep.hpp: * Author:      Jonathan Turkanis
+boost/iostreams/restrict.hpp: * Author:      Jonathan Turkanis
+boost/graph/two_bit_color_map.hpp://  Authors: Jeremiah Willcock
+boost/graph/small_world_generator.hpp://  Authors: Douglas Gregor
+boost/graph/circle_layout.hpp://  Authors: Douglas Gregor
+boost/graph/random_layout.hpp://  Authors: Douglas Gregor
+boost/graph/prim_minimum_spanning_tree.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/fruchterman_reingold.hpp://  Authors: Douglas Gregor
+boost/graph/detail/adj_list_edge_iterator.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/d_ary_heap.hpp:// Authors: Jeremiah J. Willcock, Andrew Lumsdaine
+boost/graph/detail/read_graphviz_new.hpp:// Author: Jeremiah Willcock
+boost/graph/detail/list_base.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/indexed_properties.hpp://  Authors: Jeremiah Willcock
+boost/graph/detail/read_graphviz_spirit.hpp:// Author: Ronald Garcia
+boost/graph/detail/sparse_ordering.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek,
+boost/graph/detail/array_binary_tree.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/self_avoiding_walk.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/adjacency_list.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Thomas Claveirole
+boost/graph/detail/edge.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/histogram_sort.hpp://  Authors: Jeremiah Willcock
+boost/graph/detail/connected_components.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/detail/compressed_sparse_row_struct.hpp://  Authors: Jeremiah Willcock
+boost/graph/detail/incremental_components.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Michael Hansen
+boost/graph/detail/is_distributed_selector.hpp://  Authors: Jeremiah Willcock
+boost/graph/detail/incidence_iterator.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/graph_as_tree.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/properties.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/dijkstra_shortest_paths_no_color_map.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Michael Hansen
+boost/graph/bipartite.hpp: * Authors: Matthias Walter
+boost/graph/leda_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Douglas Gregor,
+boost/graph/page_rank.hpp://  Authors: Douglas Gregor
+boost/graph/copy.hpp:// Authors: Jeremy G. Siek, Lie-Quan Lee, Andrew Lumsdaine
+boost/graph/kruskal_min_spanning_tree.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/random.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/erdos_renyi_generator.hpp://  Authors: Jeremiah Willcock
+boost/graph/plod_generator.hpp://  Authors: Douglas Gregor
+boost/graph/graph_archetypes.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/graph_utility.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/graph_stats.hpp://  Authors: Alex Breuer
+boost/graph/simple_point.hpp:// Authors: Andrew Lumsdaine, Douglas Gregor
+boost/graph/accounting.hpp://  Authors: Douglas Gregor
+boost/graph/adj_list_serialize.hpp:// Authors: Jeremy G. Siek
+boost/graph/neighbor_bfs.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/distributed/two_bit_color_map.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/fruchterman_reingold.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/detail/filtered_queue.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/detail/remote_update_set.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/detail/dijkstra_shortest_paths.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/page_rank.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/mpi_process_group.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/crauser_et_al_shortest_paths.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/hohberg_biconnected_components.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/unsafe_serialize.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/local_subgraph.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/boman_et_al_graph_coloring.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/distributed_graph_utility.hpp://  Authors: Peter Gottschling
+boost/graph/distributed/adjacency_list.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/delta_stepping_shortest_paths.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/breadth_first_search.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/queue.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/compressed_sparse_row_graph.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/reverse_graph.hpp://  Authors: Nick Edmonds
+boost/graph/distributed/vertex_list_adaptor.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/connected_components.hpp://  Authors: Nick Edmonds
+boost/graph/distributed/strong_components.hpp://  Authors: Nick Edmonds
+boost/graph/distributed/filtered_graph.hpp://  Authors: Nick Edmonds
+boost/graph/distributed/one_bit_color_map.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/st_connected.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/graphviz.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/concepts.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/betweenness_centrality.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/dehne_gotz_min_spanning_tree.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/rmat_graph_generator.hpp://  Authors: Nick Edmonds
+boost/graph/distributed/depth_first_search.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/adjlist/redistribute.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/dijkstra_shortest_paths.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/eager_dijkstra_shortest_paths.hpp://  Authors: Douglas Gregor
+boost/graph/distributed/connected_components_parallel_search.hpp://  Authors: Brian Barrett
+boost/graph/distributed/selector.hpp://  Authors: Douglas Gregor
+boost/graph/point_traits.hpp://  Authors: Douglas Gregor
+boost/graph/undirected_dfs.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/kamada_kawai_spring_layout.hpp://  Authors: Douglas Gregor
+boost/graph/subgraph.hpp:// Authors: Jeremy G. Siek and Lie-Quan Lee
+boost/graph/dll_import_export.hpp:// Authors: Lie-Quan Lee, Jeremy Siek, and Douglas Gregor
+boost/graph/lookup_edge.hpp:// Author: Jeremiah Willcock
+boost/graph/metis.hpp://  Authors: Douglas Gregor
+boost/graph/matrix_as_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/edge_list.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/adjacency_list.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Thomas Claveirole
+boost/graph/cuthill_mckee_ordering.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek,
+boost/graph/breadth_first_search.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/parallel/detail/inplace_all_to_all.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/properties.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/process_group.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/algorithm.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/container_traits.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/distribution.hpp://  Authors: Douglas Gregor
+boost/graph/parallel/basic_reduce.hpp://  Authors: Douglas Gregor
+boost/graph/edge_connectivity.hpp:// Authors: Jeremy G. Siek, Andrew Lumsdaine, Lie-Quan Lee
+boost/graph/adjacency_list_io.hpp:// Author: Francois Faure
+boost/graph/sequential_vertex_coloring.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/random_spanning_tree.hpp://  Authors: Jeremiah Willcock
+boost/graph/compressed_sparse_row_graph.hpp://  Authors: Jeremiah Willcock
+boost/graph/edmonds_karp_max_flow.hpp:// Authors: Jeremy G. Siek, Andrew Lumsdaine, Lie-Quan Lee
+boost/graph/bellman_ford_shortest_paths.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/smallest_last_ordering.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/gursoy_atun_layout.hpp://  Authors: Jeremiah Willcock
+boost/graph/vector_as_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Douglas Gregor
+boost/graph/grid_graph.hpp:// Authors: Michael Hansen, Andrew Lumsdaine
+boost/graph/bc_clustering.hpp://  Authors: Douglas Gregor
+boost/graph/adjacency_matrix.hpp:// Authors: Jeremy G. Siek and Douglas Gregor <dgregor@cs.indiana.edu>
+boost/graph/graph_traits.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/connected_components.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/visitors.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/loop_erased_random_walk.hpp://  Authors: Jeremiah Willcock
+boost/graph/strong_components.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/filtered_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/vertex_and_edge_range.hpp://  Authors: Douglas Gregor
+boost/graph/one_bit_color_map.hpp://  Authors: Jeremiah Willcock
+boost/graph/metric_tsp_approx.hpp:// Author: Matyas W Egyhazy
+boost/graph/dag_shortest_paths.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/st_connected.hpp://  Authors: Douglas Gregor
+boost/graph/incremental_components.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek, Michael Hansen
+boost/graph/core_numbers.hpp:// Authors: David Gleich
+boost/graph/graphviz.hpp:// Authors: Lie-Quan Lee, Jeremy Siek, and Douglas Gregor
+boost/graph/adjacency_iterator.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/ssca_graph_generator.hpp://  Authors: Nick Edmonds
+boost/graph/betweenness_centrality.hpp://  Authors: Douglas Gregor
+boost/graph/dimacs.hpp://  Authors: Alex Breuer
+boost/graph/graph_test.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/graphml.hpp://  Authors: Douglas Gregor
+boost/graph/push_relabel_max_flow.hpp:// Authors: Jeremy G. Siek, Andrew Lumsdaine, Lie-Quan Lee
+boost/graph/use_mpi.hpp://  Authors: Nick Edmonds
+boost/graph/exception.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/topological_sort.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/king_ordering.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek,
+boost/graph/minimum_degree_ordering.hpp:// Authors: Lie-Quan Lee, Jeremy Siek
+boost/graph/read_dimacs.hpp:// Authors: Jeremy G. Siek, Andrew Lumsdaine, Lie-Quan Lee
+boost/graph/rmat_graph_generator.hpp://  Authors: Nick Edmonds
+boost/graph/named_function_params.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/topology.hpp://  Authors: Jeremiah Willcock
+boost/graph/graph_concepts.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/overloading.hpp://  Authors: Douglas Gregor
+boost/graph/relax.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek,
+boost/graph/iteration_macros_undef.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/depth_first_search.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/transpose_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/mesh_graph_generator.hpp://  Authors: Nick Edmonds
+boost/graph/dijkstra_shortest_paths.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/mcgregor_common_subgraphs.hpp:// Authors: Michael Hansen, Andrew Lumsdaine
+boost/graph/graph_selectors.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/floyd_warshall_shortest.hpp://  Authors: Lauren Foutz
+boost/graph/johnson_all_pairs_shortest.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/create_condensation_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/stanford_graph.hpp:// Authors: Andrew Lumsdaine, Lie-Quan Lee, Jeremy G. Siek
+boost/graph/iteration_macros.hpp:// Author: Jeremy G. Siek
+boost/multi_array.hpp://  Authors: Ronald Garcia
+boost/date_time/local_time/tz_database.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/custom_time_zone.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/date_duration_operators.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/local_time.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/local_date_time.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/local_time_types.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/conversion.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/dst_transition_day_rules.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/posix_time_zone.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_time/local_time_io.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_formatting_streams.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/special_values_parser.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_iterator.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_system_split.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_duration_types.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_duration.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_iterator.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/period_formatter.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_formatting_limited.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/strings_from_facet.hpp: * Author: Jeff Garland
+boost/date_time/date_format_simple.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_formatting.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_formatting_locales.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/int_adapter.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/special_values_formatter.hpp: * Author: Jeff Garland
+boost/date_time/time_parsing.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_parsing.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/microsec_time_clock.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/year_month_day.hpp: * Author: Jeff Garland 
+boost/date_time/period.hpp: * Author: Jeff Garland, Bart Garst 
+boost/date_time/time_zone_base.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian_calendar.hpp: * Author: Jeff Garland
+boost/date_time/adjust_functors.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/compiler_config.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_facet.hpp: * Author:  Martin Andrian, Jeff Garland, Bart Garst
+boost/date_time/string_parse_tree.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_generators.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_defs.hpp: * Author: Jeff Garland
+boost/date_time/special_defs.hpp: * Author: Jeff Garland 
+boost/date_time/string_convert.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/c_local_time_adjustor.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/dst_rules.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/locale_config.hpp: * Author: Jeff Garland
+boost/date_time/local_time_adjustor.hpp: * Author: Jeff Garland 
+boost/date_time/dst_transition_generators.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/local_timezone_defs.hpp: * Author: Jeff Garland 
+boost/date_time/date_clock_device.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/tz_db_base.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_zone_names.hpp: * Author: Jeff Garland
+boost/date_time/time_duration.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_clock.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/time_system_counted.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/parse_format_base.hpp: * Author: Jeff Garland 
+boost/date_time/constrained_value.hpp: * Author: Jeff Garland 
+boost/date_time/time_facet.hpp: * Author:  Martin Andrian, Jeff Garland, Bart Garst
+boost/date_time/time_resolution_traits.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_names_put.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/date_duration_operators.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time_system.hpp: * Author: Jeff Garland
+boost/date_time/posix_time/time_parsers.hpp: * Author: Jeff Garland 
+boost/date_time/posix_time/time_serialize.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/time_period.hpp: * Author: Jeff Garland 
+boost/date_time/posix_time/time_formatters_limited.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time_duration.hpp: * Author: Jeff Garland
+boost/date_time/posix_time/conversion.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time_legacy_io.hpp: * Author: Jeff Garland, Bart Garst 
+boost/date_time/posix_time/time_formatters.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time.hpp: * Author: Jeff Garland, Bart Garst 
+boost/date_time/posix_time/ptime.hpp: * Author: Jeff Garland 
+boost/date_time/posix_time/posix_time_io.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time_config.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/posix_time/posix_time_types.hpp: * Author: Jeff Garland 
+boost/date_time/time_defs.hpp: * Author: Jeff Garland 
+boost/date_time/c_time.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_generator_parser.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/period_parser.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date_generator_formatter.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/wrapping_int.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/filetime_functions.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/format_date_parser.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/gregorian.hpp: * Author: Jeff Garland, Bart Garst 
+boost/date_time/gregorian/greg_calendar.hpp: * Author: Jeff Garland
+boost/date_time/gregorian/greg_month.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/formatters_limited.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_day_of_year.hpp: * Author: Jeff Garland 
+boost/date_time/gregorian/gregorian_types.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_weekday.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/conversion.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_duration.hpp: * Author: Jeff Garland, Bart Garst 
+boost/date_time/gregorian/greg_date.hpp: * Author: Jeff Garland
+boost/date_time/gregorian/gregorian_io.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/parsers.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_ymd.hpp: * Author: Jeff Garland 
+boost/date_time/gregorian/greg_serialize.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_year.hpp: * Author: Jeff Garland 
+boost/date_time/gregorian/greg_day.hpp: * Author: Jeff Garland 
+boost/date_time/gregorian/greg_duration_types.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/greg_facet.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/gregorian/formatters.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/date.hpp: * Author: Jeff Garland, Bart Garst
+boost/date_time/iso_format.hpp: * Author: Jeff Garland, Bart Garst
+boost/mpi/detail/ignore_iprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/binary_buffer_oprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/ignore_skeleton_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/forward_iprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/forward_oprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/packed_iprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/mpi_datatype_primitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/mpi_datatype_cache.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/packed_oprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/ignore_oprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/forward_skeleton_iarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/text_skeleton_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/content_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/mpi_datatype_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/binary_buffer_iprimitive.hpp://  Authors: Matthias Troyer
+boost/mpi/detail/forward_skeleton_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/skeleton_and_content.hpp://  Authors: Matthias Troyer
+boost/mpi/datatype.hpp://  Authors: Douglas Gregor
+boost/mpi/packed_iarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/python.hpp://  Authors: Douglas Gregor
+boost/mpi/operations.hpp://  Authors: Douglas Gregor
+boost/mpi/collectives/scan.hpp://   Authors: Douglas Gregor
+boost/mpi/collectives/reduce.hpp://   Authors: Douglas Gregor
+boost/mpi/collectives/all_reduce.hpp://   Authors: Douglas Gregor
+boost/mpi/intercommunicator.hpp:// Authors: Douglas Gregor
+boost/mpi/group.hpp:// Authors: Douglas Gregor
+boost/mpi/packed_oarchive.hpp://  Authors: Matthias Troyer
+boost/mpi/skeleton_and_content_fwd.hpp://  Authors: Douglas Gregor
+boost/mpi/graph_communicator.hpp:// Authors: Douglas Gregor
+boost/mpi/python/skeleton_and_content.hpp://  Authors: Douglas Gregor
+boost/mpi/python/serialize.hpp://  Authors: Douglas Gregor
+boost/icl/detail/design_config.hpp:Author: Joachim Faulhaber
+boost/icl/detail/relation_state.hpp:Author: Joachim Faulhaber
+boost/icl/impl_config.hpp:Author: Joachim Faulhaber
+boost/utility/enable_if.hpp://    Authors: Jaakko Jarvi (jajarvi at osl.iu.edu)
+boost/date_time.hpp: * Author: Jeff Garland

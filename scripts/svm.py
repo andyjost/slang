@@ -16,6 +16,7 @@ X = np.load('data.np').astype(dtype=float)
 pca.fit(X)
 X = pca.transform(X)
 X = preprocessing.scale(X)
+print X.shape
 
 # import code
 # code.interact(local=globals())
@@ -71,5 +72,6 @@ for i, clf in enumerate((svc, lin_svc, rbf_svc, poly_svc)):
     plt.yticks(())
     plt.title(titles[i])
 
+plt.savefig('figure.pdf', bbox_inches='tight')
 plt.show()
 

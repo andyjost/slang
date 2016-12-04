@@ -35,7 +35,7 @@ def function_body(cursor):
 def is_definition(cursor):
   if not is_function(cursor): return False
   children = list(cursor.get_children())
-  result = children and is_compound_stmt(children[-1])
+  result = bool(children) and is_compound_stmt(children[-1])
   assert result == cursor.is_definition()
   return result
 
@@ -133,6 +133,48 @@ def function_has_newline_before_body(cursor):
   p = uselect(cursor.tokens, [owned_by(body), is_spelled(_, '{')])
   prev = uselect(revfrom(p.prev()), [or_(not_(is_whitespace), is_line_end)])
   return is_line_end(prev)
+
+@functor
+def this(item):
+  return item
+
+@functor
+def up(item):
+  if item is None:
+    return None
+  else:
+    return item.up()
+
+@functor
+def down(item, i):
+  if item is None:
+    return None
+  else:
+    return item.down(i)
+
+@functor
+def left(item):
+  if item is None:
+    return None
+  else:
+    return item.left()
+
+@functor
+def right(item):
+  if item is None:
+    return None
+  else:
+    return item.right()
+
+@functor
+def true(*args):
+  return True
+
+@functor
+def false(*args):
+  return False
+
+
 
 # Add _ to the public names.
 __all__ = ['_'] + filter(lambda s: not s.startswith('_'), globals().keys())

@@ -26,6 +26,7 @@ def parseDirectory(dirname, glob='*.[ch]pp', args=[]):
         yield tu
 
 def parseFile(filename, args=[]):
+  print 'Parsing', filename
   index = cindex.Index.create()
   astpath = filename + '.ast'
   if os.path.isfile(astpath):
@@ -78,8 +79,14 @@ class SourceIndex(object):
         yield Cursor(cursor)
 
 class Cursor(object):
+  def __new__(cls, cursor):
+    if cursor is None:
+      return None
+    else:
+      return object.__new__(cls)
   def __init__(self, cursor):
     self.cursor = getattr(cursor,'cursor',cursor)
+    assert isinstance(self.cursor, cindex.Cursor)
 
   def __getattribute__(self, name):
     try:
@@ -105,6 +112,35 @@ class Cursor(object):
         lambda t: offset_begin <= t.location.offset <= offset_end
       , self._token_window
       )
+
+  def seq_down(self):
+    seq = list(self.children)
+    l = len(seq)
+    if l == 0:
+      seq = list(self.tokens)
+    return seq
+
+  def up(self):
+    return Cursor(self.cursor.semantic_parent)
+
+  def down(self, i):
+    assert(i >= 0)
+    seq = self.seq_down()
+    return seq[i] if i < len(seq) else None
+
+  def left(self):
+    parent = self.up()
+    if parent is None: return None
+    seq = parent.seq_down()
+    i = seq.index(self) - 1
+    return seq[i] if 0 <= i < len(seq) else None
+
+  def right(self):
+    parent = self.up()
+    if parent is None: return None
+    seq = parent.seq_down()
+    i = seq.index(self) + 1
+    return seq[i] if 0 <= i < len(seq) else None
 
   @property
   def children(self):
@@ -137,3 +173,39 @@ def cursorize(cursor):
     for c in cursorize(child):
       yield c
 
+class Token(object):
+  def __new__(cls, token):
+    if token is None:
+      return None
+    else:
+      return object.__new__(cls)
+  def __init__(self, token):
+    self.token = getattr(token,'token',token)
+    assert isinstance(self.token, cindex.Token)
+  def __getattribute__(self, name):
+    try:
+      token = object.__getattribute__(self, 'token')
+      return getattr(token, name)
+    except AttributeError:
+      return object.__getattribute__(self, name)
+
+  def up(self):
+    return Cursor(self.token.cursor)
+
+  def down(self, i):
+    return None
+
+  def left(self):
+    parent = self.up()
+    if parent is None: return None
+    seq = parent.seq_down()
+    i = seq.index(self) - 1
+    return seq[i] if 0 <= i < len(seq) else None
+
+  def right(self):
+    parent = self.up()
+    if parent is None: return None
+    seq = parent.seq_down()
+    i = seq.index(self) + 1
+    return seq[i] if 0 <= i < len(seq) else None
+    

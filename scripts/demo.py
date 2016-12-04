@@ -17,7 +17,7 @@ import code
 def pause():
   # sys.stdout.write('[Press enter to continue]')
   # sys.stdin.readline()
-  #code.interact(local=globals(), banner='')
+  code.interact(local=globals(), banner='')
   return
 
 def interact(): pdb.set_trace()
@@ -41,7 +41,10 @@ def fst(s): return s[0]
 getters = dict(on_true=getpos, on_false=getneg)
 
 print 'Classify on property "a newline occurs before the function body."'
-idx = SourceIndex(['./boost/optional/', './boost/numeric/conversion/'], args=['-I.'])
+files = ['./boost/optional/', './boost/numeric/conversion/']
+# files = ['./boost/accumulators/']
+# files = [f.strip() for f in open('boost_files.txt.a-c').readlines()]
+idx = SourceIndex(files, args=['-I.'])
 cursors = np.array(list(idx.cursors([is_definition])))
 print '# of function definitions:', len(cursors)
 def p(out=None, given=true):
@@ -73,7 +76,6 @@ RULE = (
   & lt(function_body_stmts, 3)
   & lt(length_as_single_line, 115)
   )
-
 print 'P =', probability(cursors, function_has_newline_before_body)
 print 'P|R =', probability(cursors, function_has_newline_before_body, RULE)
 print 'P|~R =', probability(cursors, function_has_newline_before_body, ~RULE)
@@ -89,6 +91,10 @@ FEATURES = [
   , length_as_single_line
   ]
 
+data = np.array([[f(c) for f in FEATURES] for c in cursors])
+target = np.array(map(function_has_newline_before_body, cursors))
+# data.dump('data.np')
+# target.dump('target.np')
 pause()
 
 print
@@ -96,10 +102,6 @@ print '=' * 80
 print 'Naive Bayes (1)'.center(80)
 print '=' * 80
 
-data = np.array([[f(c) for f in FEATURES] for c in cursors])
-target = np.array(map(function_has_newline_before_body, cursors))
-data.dump('data.np')
-target.dump('target.np')
 for nb in [GaussianNB(), BernoulliNB(), MultinomialNB()]:
   y_pred = nb.fit(data, target).predict(data)
   print "%s: mislabeled %d/%d points." % (
@@ -168,4 +170,7 @@ for i,group in islice(groupby(izip(*np.where(costs==bests)), fst), 8, 9):
     print data[isimilar]
     print cursors[isimilar].source
     pause()
+
+print "(END)"
+pause()
 

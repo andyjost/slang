@@ -19,8 +19,8 @@ def report(classifier, data, target):
        type(classifier).__name__, n_missed, data.shape[0]
     )
 
-data = np.load('data.np').astype(dtype=float)
-target = np.load('target.np').astype(dtype=float)
+data = np.load('data.small.np').astype(dtype=float)
+target = np.load('target.small.np').astype(dtype=float)
 
 print
 print '=' * 80
